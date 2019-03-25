@@ -245,7 +245,7 @@ if __name__ == "__main__":
         #2 - face drag
         #3 - eye drag
         #4 - eye sensor
-        faceMod = 1
+        
         if faceMod == 1:
             faceGlitch(img,face)
         elif faceMod == 2:
