@@ -248,6 +248,9 @@ if __name__ == "__main__":
 
     # Add elements to image
     addElements(img)
+    #if there are no faces, just add more elements!
+    if len(faces) < 1:
+        addElements(img)
 
     #randomize if high contrast is used
     choice = rd.randint(0,1)
