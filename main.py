@@ -7,7 +7,6 @@
 
 #To change the image being used, modify code on line 208
 import cv2
-import matplotlib as plt
 import numpy as np
 import random as rd
 import os
