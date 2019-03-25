@@ -6,12 +6,13 @@
 # python main.py
 
 #To change the image being used, modify code on line 208
+import argparse
 import cv2
 import numpy as np
 import random as rd
 import os
 from datetime import datetime
-
+import pathlib
 #The following function is used to determine the placement of
 #text, at the moment it is incomplete
 #function takes corners and text
@@ -204,15 +205,30 @@ def eyeDrag(img,eyes):
             img[line:line+drop,eye[0]+itr*strp:eye[0]+itr*strp+strp] = img[line,eye[0]+itr*strp:eye[0]+itr*strp+strp]
 
 
+
+IMG_SUFFIXES = {".png", ".jpg", ".jpeg"}
+
 if __name__ == "__main__":
     #seed the random generator
     rd.seed(datetime.now())
+
+    parser = argparse.ArgumentParser()
+    # possible use case: python3 main.py --img ~/path/to/img.png
+    parser.add_argument("--img", type=str, required=False, default="testImgs/testface7.png")
+
+    args = parser.parse_args()
+
     #load files for facial and eye cascade
     face_cascade = cv2.CascadeClassifier('cascade/haarcascade_frontalface_default.xml')
     eye_cascade = cv2.CascadeClassifier('cascade/haarcascade_eye.xml')
 
+    # load the path
+    img_path = pathlib.Path(args.img)
+    # check if the image is with correct suffix
+    assert img_path.suffix in IMG_SUFFIXES, f"Image needs to be one of {IMG_SUFFIXES}"
+
     #load main image from local file
-    img = cv2.imread("testImgs/testface7.png")
+    img = cv2.imread(str(img_path.absolute()))
     height,width,depth = img.shape
     #turn image gray for detecting face and eyes
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
