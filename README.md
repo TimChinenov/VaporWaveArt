@@ -9,4 +9,7 @@ To use this code, download it and all of its folders. The program relies on the 
 haar cascades in in the folder "cascade". The repo contains a set of sample images that I found to work fairly well. 
 
 To change the image being used, modify the code on line 208 in main.py.
+
+The following link is a Medium article with an overivew of this project.
+https://medium.com/@theclassytim/computer-vision-for-vaporwave-art-32a330c827ee
  
