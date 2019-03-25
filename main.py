@@ -71,11 +71,13 @@ def addElements(img):
             img[ypos:ypos+h,xpos:xpos+w,c] = (alpha_s*element[:,:,c]+alpha_1*img[ypos:ypos+h,xpos:xpos+w,c])
 
 def faceGlitch(img,face):
+    height,width,d = img.shape
     #pixels segments of 40
     div = rd.randint(10,100)
     strp = int(round(face[3]/(div*1.0)))
     numGlitches = face[3]/strp
     for itr in range(0,numGlitches):
+        #play with the second parameter to increase "glitchiness"
         rng = rd.randint(15,100)
         rightExt = face[0]+face[2]+rng
         leftExt = face[0]+face[2]-rng
@@ -83,15 +85,21 @@ def faceGlitch(img,face):
         if leftExt < 0:
             leftExt = 0
         if rightExt >= width:
-            rightExt = width-20
+            rightExt = width
         #randomize static direction
         #1 moves left, 2 moves right
         dec = rd.randint(1,2)
         if dec%2 == 0:
-            img[face[1]+(itr*strp):face[1]+(itr*strp+strp),(face[0]+rng):rightExt] = img[face[1]+(itr*strp):face[1]+(itr*strp+strp),face[0]:face[0]+face[2]]
+            backBound = face[0]+rng
+            diff = 0
+            #make corrections if glitch falls outside of image
+            if face[0]+face[2]+rng >= width:
+                diff = face[0]+face[2]+rng - (width)
+            img[face[1]+(itr*strp):face[1]+(itr*strp+strp),(face[0]+rng):rightExt] = img[face[1]+(itr*strp):face[1]+(itr*strp+strp),face[0]:face[0]+face[2]-diff]
         else:
             backBound = face[0]-rng
             diff = 0
+            #make corrections if glitch falls outside of image
             if backBound < 0:
                 diff = abs(backBound)
                 backBound = 0
@@ -204,7 +212,7 @@ if __name__ == "__main__":
     eye_cascade = cv2.CascadeClassifier('cascade/haarcascade_eye.xml')
 
     #load main image from local file
-    img = cv2.imread("testImgs/testface9.png")
+    img = cv2.imread("testImgs/testface7.png")
     height,width,depth = img.shape
     #turn image gray for detecting face and eyes
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -237,6 +245,7 @@ if __name__ == "__main__":
         #2 - face drag
         #3 - eye drag
         #4 - eye sensor
+        faceMod = 1
         if faceMod == 1:
             faceGlitch(img,face)
         elif faceMod == 2:
