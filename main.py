@@ -196,6 +196,7 @@ def eyeDrag(img,eyes):
         iwid = eye[2]
         strp = int(round(iwid/20.))
         numGlitches = eye[2]/strp
+        numGlitches = int(numGlitches) #make sure not a float
         line = rd.randint(1,eye[3])
         line += eye[1]
         line = eye[1] + eye[3]/2
@@ -212,7 +213,7 @@ if __name__ == "__main__":
     eye_cascade = cv2.CascadeClassifier('cascade/haarcascade_eye.xml')
 
     #load main image from local file
-    img = cv2.imread("testImgs/testface7.png")
+    img = cv2.imread("testImgs/testface9.png")
     height,width,depth = img.shape
     #turn image gray for detecting face and eyes
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -245,7 +246,7 @@ if __name__ == "__main__":
         #2 - face drag
         #3 - eye drag
         #4 - eye sensor
-        
+        faceMod = 3
         if faceMod == 1:
             faceGlitch(img,face)
         elif faceMod == 2:
