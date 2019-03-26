@@ -5,7 +5,7 @@
 # To run the program call the following command in terminal
 # python main.py
 
-#To change the image being used, modify code on line 208
+#To change the image being used, modify code on line 220
 import cv2
 import numpy as np
 import random as rd
@@ -75,7 +75,7 @@ def faceGlitch(img,face):
     #pixels segments of 40
     div = rd.randint(10,100)
     strp = int(round(face[3]/(div*1.0)))
-    numGlitches = face[3]/strp
+    numGlitches = int(face[3]/strp)
     for itr in range(0,numGlitches):
         #play with the second parameter to increase "glitchiness"
         rng = rd.randint(15,100)
