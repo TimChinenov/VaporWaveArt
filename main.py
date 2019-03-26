@@ -239,22 +239,23 @@ if __name__ == "__main__":
         #randomize which face modification will be performed
         faceMod = rd.randint(1,4)
         if faceMod >= 4 and len(eyes) == 0:
-            faceMod = rd.randint(0,4)
+            faceMod = rd.randint(0,3)
 
         #0 - no mod
         #1 - face glitch
         #2 - face drag
-        #3 - eye drag
-        #4 - eye sensor
-        faceMod = 3
+        #3 - eye censor
+        #4 - eye drag
+
+        # faceMod = 3
         if faceMod == 1:
             faceGlitch(img,face)
         elif faceMod == 2:
             faceDrag(img,face)
         elif faceMod == 3:
-            eyeDrag(img,eyes)
-        elif faceMod == 4:
             eyeCensor(img,eyes)
+        elif faceMod == 4:
+            eyeDrag(img,eyes)
 
     # Add elements to image
     addElements(img)
