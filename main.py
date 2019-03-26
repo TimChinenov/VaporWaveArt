@@ -6,11 +6,15 @@
 # python main.py
 
 # To change the image being used, modify code on line 208
+import sys
+
 import cv2
 import numpy as np
 import random as rd
 import os
 from datetime import datetime
+
+ESCAPE_KEY = 27
 
 
 # The following function is used to determine the placement of
@@ -71,7 +75,7 @@ def add_elements(img):
         alpha_1 = 1.0 - alpha_s
         for c in range(0, 3):
             img[ypos:ypos + h, xpos:xpos + w, c] = (
-                        alpha_s * element[:, :, c] + alpha_1 * img[ypos:ypos + h, xpos:xpos + w, c])
+                    alpha_s * element[:, :, c] + alpha_1 * img[ypos:ypos + h, xpos:xpos + w, c])
 
 
 def face_glitch(img, face):
@@ -217,7 +221,6 @@ def eye_drag(img, eyes):
             img[line:line + drop, eye[0] + itr * strp:eye[0] + itr * strp + strp] = \
                 img[line, eye[0] + itr * strp:eye[0] + itr * strp + strp]
 
-
 def main():
     # seed the random generator
     rd.seed(datetime.now())
@@ -309,7 +312,15 @@ def main():
     #         cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
     cv2.namedWindow("pic", cv2.WINDOW_NORMAL)
     cv2.imshow("pic", img)
-    cv2.waitKey(0)
+
+    while cv2.getWindowProperty("pic", cv2.WND_PROP_VISIBLE):
+        key_code = cv2.waitKey(100)
+
+        if key_code == ESCAPE_KEY:
+            break
+
+    cv2.destroyAllWindows()
+    sys.exit()
 
 
 if __name__ == "__main__":
