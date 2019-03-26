@@ -190,18 +190,22 @@ def eyeDrag(img,eyes):
                 size = eyes[itr][2]*eyes[itr][3]
                 eye2 = eyes[itr]
         eyes = [eye1,eye2]
+
     #there should only be two eyes now
     for eye in eyes:
         #find width of eye
         iwid = eye[2]
         strp = int(round(iwid/20.))
-        numGlitches = eye[2]/strp
-        numGlitches = int(numGlitches) #make sure not a float
+        numGlitches = int(eye[2]/strp)
         line = rd.randint(1,eye[3])
         line += eye[1]
-        line = eye[1] + eye[3]/2
+        line = int(eye[1] + eye[3]/2)
         for itr in range(0,numGlitches):
+            #edit the second parameter to change eye drop chance
             drop = rd.randint(10,200)
+            #if the line drop is too low, shorten it
+            if line + drop > img.shape[0]:
+                drop = img.shape[0] - line
             img[line:line+drop,eye[0]+itr*strp:eye[0]+itr*strp+strp] = img[line,eye[0]+itr*strp:eye[0]+itr*strp+strp]
 
 
@@ -215,6 +219,7 @@ if __name__ == "__main__":
     #load main image from local file
     img = cv2.imread("testImgs/testface9.png")
     height,width,depth = img.shape
+
     #turn image gray for detecting face and eyes
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -237,17 +242,16 @@ if __name__ == "__main__":
             eye[1] += face[1]
 
         #randomize which face modification will be performed
-        faceMod = rd.randint(1,4)
-        if faceMod >= 4 and len(eyes) == 0:
-            faceMod = rd.randint(0,3)
+        faceMod = rd.randint(0,4)
+        # if there are no eyes, just re-roll
+        if faceMod >= 3 and len(eyes) == 0:
+            faceMod = rd.randint(0,2)
 
         #0 - no mod
         #1 - face glitch
         #2 - face drag
         #3 - eye censor
         #4 - eye drag
-
-        # faceMod = 3
         if faceMod == 1:
             faceGlitch(img,face)
         elif faceMod == 2:
