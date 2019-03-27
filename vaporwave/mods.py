@@ -17,6 +17,23 @@ FACE = 101
 logger = logging.getLogger("mods")
 
 
+# The following function is used to determine the placement of
+# text, at the moment it is incomplete
+# function takes corners and text
+# and resturns top left corner that
+# centers text and the angle needed
+def pos_and_angle(pts):
+    # find left top most coordinate
+    dist = np.inf
+    # left = pts[0]
+    for cr in pts:
+        if (cr[0] ** 2 + cr[1] ** 2) ** 0.5 < dist:
+            dist = (cr[0] ** 2 + cr[1] ** 2) ** 0.5
+            # left = cr
+    # first find angle
+    return 1
+
+
 def determine_face_mod(eyes_present):
     function_list = [
         (lambda x, y: x, FACE),
