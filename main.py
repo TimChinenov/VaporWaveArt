@@ -9,6 +9,7 @@
 import sys
 
 import cv2
+import logging
 import numpy as np
 import random as rd
 import os
@@ -19,6 +20,12 @@ from datetime import datetime
 
 ESCAPE_KEY = 27
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M')
+
+logger = logging.getLogger("main")
+logger.setLevel(logging.INFO)
 
 # The following function is used to determine the placement of
 # text, at the moment it is incomplete
@@ -51,7 +58,7 @@ def add_elements(img):
     # create a set to prevent element repetition
     added_counter = 0
 
-    print("Adding %d elements" % (num_elements, ))
+    logger.info("Adding %d elements" % (num_elements, ))
 
     for file_name in map(partial(os.path.join, base_dir), all_files):
         if added_counter == num_elements:
@@ -66,7 +73,7 @@ def add_single_element(img, file_name):
     imh, imw, imd = img.shape
     element = cv2.imread(file_name, -1)
     if element is None:
-        print("Could not read file %s" % (file_name,))
+        logger.warning("Could not read file %s" % (file_name,))
         return False
 
     original_height, original_width, original_depth = element.shape
@@ -77,7 +84,7 @@ def add_single_element(img, file_name):
         resized_height, resized_width, _ = element.shape
         # refuse to use this image, if this failed
         if resized_height > imh or resized_width > imw:
-            print("Element %s too big, moving on" % (file_name,))
+            logger.warning("Element %s too big, moving on" % (file_name,))
             return False
         # get x coord and y coord on the image
         from_x_pos = rd.randint(1, imw - resized_width - 1)
@@ -117,7 +124,7 @@ def main():
             img = vaporize()
             cv2.imshow("pic", img)
             end = time.time()
-            print("Vaporizing and rendering took: %f seconds" % (end-start,))
+            logger.info("Vaporizing and rendering took: %f seconds" % (end-start,))
     cv2.destroyAllWindows()
     sys.exit()
 

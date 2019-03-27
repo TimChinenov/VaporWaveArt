@@ -1,6 +1,7 @@
 import math
 
 import cv2
+import logging
 import numpy as np
 import random as rd
 
@@ -12,6 +13,8 @@ EYE_DRAG = 4
 
 EYES = 100
 FACE = 101
+
+logger = logging.getLogger("mods")
 
 
 def determine_face_mod(eyes_present):
@@ -66,7 +69,7 @@ def eye_drag(img, eyes):
 
 def eye_censor(img, eyes):
     if len(eyes) < 2:
-        print("Failed to generate censor, less than two eyes present")
+        logger.warning("Failed to generate censor, less than two eyes present")
         return
     # cenH = 40
     # get centroids of eyes
@@ -173,7 +176,7 @@ def face_glitch(img, face):
             old = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext]
             new = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), face[0]:face[0] + face[2] - diff]
             if old.shape != new.shape:
-                print("Shape mismatch: %s vs %s" % (old.shape, new.shape, ))
+                logger.warning("Shape mismatch: %s vs %s" % (old.shape, new.shape, ))
                 return
 
             img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext] = \
