@@ -27,6 +27,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("main")
 logger.setLevel(logging.INFO)
 
+
 # The following function is used to determine the placement of
 # text, at the moment it is incomplete
 # function takes corners and text
