@@ -14,7 +14,34 @@ EYE_DRAG = 4
 EYES = 100
 FACE = 101
 
+DEGREES_PER_RADIAN = 57.296
+
+TOP_LEFT = 0
+TOP_RIGHT = 1
+BOTTOM_RIGHT = 2
+BOTTOM_LEFT = 3
+
 logger = logging.getLogger("mods")
+
+
+def sort_corners(corners):
+    corners = sorted(corners, key=lambda x: x[0])
+    top_left, bottom_left = sorted(corners[0:2], key=lambda x: x[1])
+    top_right, bottom_right = sorted(corners[2:4], key=lambda x: [1])
+
+    return top_left, top_right, bottom_right, bottom_left
+
+
+def unit_vector(vector):
+    return vector / np.linalg.norm(vector)
+
+
+def angle(first, second, to_degrees=True):
+    unit_first = unit_vector(first)
+    unit_second = unit_vector(second)
+
+    radians = np.arccos(np.clip(np.dot(unit_first, unit_second), -1.0, 1.0))
+    return radians * DEGREES_PER_RADIAN if to_degrees else radians
 
 
 # The following function is used to determine the placement of
@@ -24,14 +51,12 @@ logger = logging.getLogger("mods")
 # centers text and the angle needed
 def pos_and_angle(pts):
     # find left top most coordinate
-    dist = np.inf
-    # left = pts[0]
-    for cr in pts:
-        if (cr[0] ** 2 + cr[1] ** 2) ** 0.5 < dist:
-            dist = (cr[0] ** 2 + cr[1] ** 2) ** 0.5
-            # left = cr
-    # first find angle
-    return 1
+    left_upper = pts[TOP_LEFT]
+    right_upper = pts[TOP_RIGHT]
+
+    vector = np.array(left_upper - right_upper)
+    y_axis = np.array(np.array([0, 0]) - np.array([1, 0]))
+    return left_upper, angle(vector, y_axis)
 
 
 def determine_face_mod(eyes_present):
@@ -90,11 +115,11 @@ def eye_censor(img, eyes):
         return
     # cenH = 40
     # get centroids of eyes
-    c1 = np.array([eyes[0][0] + eyes[0][2] / 2.0, eyes[0][1] + eyes[0][3] / 2.0])
-    c2 = np.array([eyes[1][0] + eyes[1][2] / 2.0, eyes[1][1] + eyes[1][3] / 2.0])
+    centroid_right = np.array([eyes[0][0] + eyes[0][2] / 2.0, eyes[0][1] + eyes[0][3] / 2.0])
+    centroid_left = np.array([eyes[1][0] + eyes[1][2] / 2.0, eyes[1][1] + eyes[1][3] / 2.0])
     # find the corners of the bar
     # find vector of the two centroids
-    vec = c1 - c2
+    vec = centroid_right - centroid_left
     # unitize vector
     vec = vec / (vec[0] ** 2.0 + vec[1] ** 2.0) ** 0.5
     # perpendicular vector
@@ -103,34 +128,57 @@ def eye_censor(img, eyes):
     # censor bar
     w_ex = 40
     mag = 75
-    cr1 = per_vec * w_ex + c1
-    cr2 = c1 - per_vec * w_ex
-    cr3 = per_vec * w_ex + c2
-    cr4 = c2 - per_vec * w_ex
-    cr1 += vec * mag
-    cr2 += vec * mag
-    cr3 -= vec * mag
-    cr4 -= vec * mag
+    right_upper = per_vec * w_ex + centroid_right
+    right_lower = centroid_right - per_vec * w_ex
+    left_upper = per_vec * w_ex + centroid_left
+    left_lower = centroid_left - per_vec * w_ex
+    right_upper += vec * mag
+    right_lower += vec * mag
+    left_upper -= vec * mag
+    left_lower -= vec * mag
     # round all values
-    pts = np.array([cr1, cr2, cr4, cr3])
-    cv2.fillPoly(img, np.array([pts], dtype=np.int32), (0, 0, 0))
-    #########################################################
-    # The following code is incomplete. It's purpose is to randomly
-    # add text to the censor bar
-    # roll to see if to add text
-    # textc = rd.randint(0,2)
-    # textc = 1
-    # if textc == 1:
-    #     text = open("elements/censor.txt","r")
-    #     allText = text.read()
-    #     possText = allText.split(";")
-    #     dec = rd.randint(0,len(possText))
-    #     use = possText[dec]
-    #     #calculate text position and angle
-    #     # info = posAndAngle(pts,use)
-    #     font = cv2.FONT_HERSHEY_SIMPLEX
-    #     cv2.putText(img,use,(int(cr1[0]),int(cr1[1])), font, 1,(255,255,255),2,cv2.LINE_AA)
-    ############################################################
+    corners = sort_corners([right_upper, right_lower, left_lower, left_upper])
+    print(corners)
+    cv2.fillPoly(img, np.array([corners], dtype=np.int32), (0, 0, 0))
+
+    should_render_text = rd.randint(0, 2)
+    if should_render_text:
+        with open("elements/censor.txt", "r") as text_file:
+            allText = text_file.read()
+            possText = allText.split(";")
+            dec = rd.randint(0, len(possText) - 1)
+            text = possText[dec]
+            # calculate text position and angle
+            return render_text(text, corners, img)
+
+
+def render_text(text, corners, img):
+    left_upper, right_upper, right_lower, left_lower = corners
+    corner, rotation_angle = pos_and_angle(corners)
+
+    text_image = np.ones(img.shape)
+
+    text_img_rows, text_img_cols, _ = text_image.shape
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    text_size = cv2.getTextSize(text, font, 1, 1)
+    (text_width, text_height), _ = text_size
+
+    text_corner_x = left_upper[0] + (right_upper[0] - left_upper[0]) / 2.0 - text_width / 2.0
+
+    text_corner_y = left_upper[1] + (left_lower[1] - left_upper[1]) / 2.0 - text_height / 2.0
+
+    corner_coords = (int(text_corner_x), int(text_corner_y))
+
+    rotation_matrix = cv2.getRotationMatrix2D(corner_coords, rotation_angle, 1)
+
+    cv2.putText(text_image, text, corner_coords, font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+    text_image = cv2.warpAffine(text_image, rotation_matrix, (text_img_cols, text_img_rows))
+
+    img = text_image + img
+    cv2.imshow("pic", img)
+    return img
 
 
 def face_drag(img, face):
@@ -193,7 +241,7 @@ def face_glitch(img, face):
             old = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext]
             new = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), face[0]:face[0] + face[2] - diff]
             if old.shape != new.shape:
-                logger.warning("Shape mismatch: %s vs %s" % (old.shape, new.shape, ))
+                logger.warning("Shape mismatch: %s vs %s" % (old.shape, new.shape,))
                 return
 
             img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext] = \
