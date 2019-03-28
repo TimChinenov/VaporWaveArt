@@ -40,9 +40,13 @@ def vaporize(image_path="testImgs/testface9.png"):
         eyes_present = len(eyes) >= 2
         mod_function, operates_on = mods.determine_face_mod(eyes_present)
         if operates_on == mods.EYES:
-            mod_function(img, eyes)
+            modded_img = mod_function(img, eyes)
+            if modded_img is not None:
+                img = modded_img
         elif operates_on == mods.FACE:
-            mod_function(img, face)
+            modded_img = mod_function(img, face)
+            if modded_img is not None:
+                img = modded_img
 
     # Add elements to image
     add_elements(img)
