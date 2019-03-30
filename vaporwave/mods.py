@@ -212,37 +212,31 @@ def face_glitch(img, face):
     if type(num_glitches) == np.float64:
         num_glitches = math.floor(num_glitches)
     for itr in range(0, num_glitches):
+        #set limits of y-axis
+        st_y = face[1] + (itr * strp)
+        end_y = face[1] + (itr * strp + strp)
         # play with the second parameter to increase "glitchiness"
         rng = rd.randint(15, 100)
-        right_ext = face[0] + face[2] + rng
-        left_ext = face[0] + face[2] - rng
-        # make sure extremes don't go out of bounds
-        if left_ext < 0:
-            left_ext = 0
-        if right_ext >= width:
-            right_ext = width
-        # randomize static direction
-        # 1 moves left, 2 moves right
+        #randomize direction face is glitched in
         dec = rd.randint(1, 2)
-        back_bound = face[0] + rng
+        #if length modifications need to be made, this value is changed
+        diff = 0
+        #1 shifts image left 2 shifts it right
         if dec % 2 == 0:
-            diff = 0
-            # make corrections if glitch falls outside of image
+            #check to make sure in bounds
             if face[0] + face[2] + rng >= width:
                 diff = face[0] + face[2] + rng - width
-            img[face[1] + (itr * strp):face[1] + (itr * strp + strp), (face[0] + rng):right_ext] = \
-                img[face[1] + (itr * strp):face[1] + (itr * strp + strp), face[0]:face[0] + face[2] - diff]
+                #set rng in bounds if its too big
+                rng = width - (face[0] + face[2])
+            # perform glitch effect
+            img[st_y:end_y, (face[0] + rng):face[0] + face[2] + rng] = \
+                img[st_y:end_y, face[0]:face[0] + face[2] - diff]
         else:
-            diff = 0
-            # make corrections if glitch falls outside of image
-            if back_bound < 0:
-                diff = abs(back_bound)
-                back_bound = 0
-            old = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext]
-            new = img[face[1] + (itr * strp):face[1] + (itr * strp + strp), face[0]:face[0] + face[2] - diff]
-            if old.shape != new.shape:
-                logger.warning("Shape mismatch: %s vs %s" % (old.shape, new.shape,))
-                return
-
-            img[face[1] + (itr * strp):face[1] + (itr * strp + strp), back_bound:left_ext] = \
-                img[face[1] + (itr * strp):face[1] + (itr * strp + strp), face[0]:face[0] + face[2] - diff]
+            #check if range leaves the images size
+            if face[0] - rng < 0:
+                diff = abs(face[0] - rng)
+                #set rng in bounds if too small
+                rng = face[0]
+            # perform glitch effect
+            img[st_y:end_y, (face[0] - rng):face[0] + face[2] - rng] = \
+                img[st_y:end_y, face[0]:face[0] + face[2] - diff]

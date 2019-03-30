@@ -7,7 +7,7 @@ from .elements import add_single_element, add_elements
 from . import mods
 
 
-def vaporize(image_path="testImgs/testface9.png"):
+def vaporize(image_path="testImgs/testface5.png"):
     face_cascade = cv2.CascadeClassifier('cascade/haarcascade_frontalface_default.xml')
     eye_cascade = cv2.CascadeClassifier('cascade/haarcascade_eye.xml')
 
