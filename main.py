@@ -5,8 +5,13 @@
 # To run the program call the following command in terminal
 # python main.py
 
+import argparse
+import os
 import sys
 import logging
+
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 
 import cv2
 
@@ -21,10 +26,24 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("main")
 logger.setLevel(logging.INFO)
 
-
 def main():
 
-    img = vaporize()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--img", type=str, required=False, default="")
+
+    args = parser.parse_args()
+
+    filepath = args.img
+
+    if filepath == "":
+        Tk().withdraw()
+        filepath = askopenfilename(filetypes=[("Image files", ".png .jpg .jpeg")])
+
+        if not os.path.isfile(filepath):
+            logger.error("Invalid file path")
+            exit()
+
+    img = vaporize(image_path=filepath)
 
     cv2.namedWindow("pic", cv2.WINDOW_NORMAL)
     cv2.imshow("pic", img)
@@ -37,7 +56,7 @@ def main():
         elif key_code != -1:
             import time
             start = time.time()
-            img = vaporize()
+            img = vaporize(image_path=filepath)
             cv2.imshow("pic", img)
             end = time.time()
             logger.info("Vaporizing and rendering took: %f seconds" % (end-start,))
