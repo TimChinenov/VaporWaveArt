@@ -1,5 +1,5 @@
 # VaporWaveArt
-The following code Vaporwaves an image. This code is purely artistic and has no other purpose. 
+The following code Vaporwaves an image. This code is purely artistic and has a very simplistic layout. 
 
 To run the code, run main.py in a python shell. A image should appear. If you click ESC, the image will close. Clicking any other key will refresh the image. 
 
